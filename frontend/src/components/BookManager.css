@@ -1,0 +1,181 @@
+.book-manager {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #1a1a3a;
+  border-right: 1px solid #2a2a4a;
+}
+
+.book-manager-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #2a2a4a;
+  background: #0f0f23;
+}
+
+.book-manager-header h3 {
+  font-size: 1.1rem;
+  color: #fff;
+  margin: 0;
+}
+
+.book-manager-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.refresh-button,
+.process-all-button {
+  background: #2a2a4a;
+  border: 1px solid #3a3a5a;
+  color: #e0e0e0;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.2s;
+}
+
+.refresh-button:hover,
+.process-all-button:hover:not(:disabled) {
+  background: #3a3a5a;
+}
+
+.process-all-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sources-filter {
+  padding: 1rem;
+  border-bottom: 1px solid #2a2a4a;
+  background: #0f0f23;
+}
+
+.sources-filter h4 {
+  font-size: 0.9rem;
+  color: #aaa;
+  margin-bottom: 0.75rem;
+}
+
+.source-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.source-checkboxes label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #e0e0e0;
+  cursor: pointer;
+}
+
+.source-checkboxes input[type="checkbox"] {
+  cursor: pointer;
+}
+
+.books-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
+
+.empty-state .hint {
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  color: #555;
+}
+
+.book-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  background: #0f0f23;
+  border: 1px solid #2a2a4a;
+  border-radius: 8px;
+  transition: border-color 0.2s;
+}
+
+.book-item:hover {
+  border-color: #3a3a5a;
+}
+
+.book-info {
+  flex: 1;
+}
+
+.book-name {
+  font-weight: 500;
+  color: #fff;
+  margin-bottom: 0.25rem;
+  font-size: 0.95rem;
+}
+
+.book-meta {
+  font-size: 0.8rem;
+  color: #888;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.processed-badge {
+  color: #50c878;
+  font-weight: 500;
+  margin-left: 0.5rem;
+}
+
+.book-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.process-button,
+.delete-button {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.process-button {
+  background: #4a90e2;
+  color: #fff;
+}
+
+.process-button:hover:not(:disabled) {
+  background: #5aa0f2;
+}
+
+.process-button.processed {
+  background: #50c878;
+}
+
+.process-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.delete-button {
+  background: #e24a4a;
+  color: #fff;
+}
+
+.delete-button:hover {
+  background: #f25a5a;
+}

@@ -1,0 +1,39 @@
+# FastAPI and Server
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+python-multipart==0.0.6
+
+# Neo4j and Graph Database
+neo4j==5.28.1
+langchain-neo4j==0.4.0
+
+# LangChain Core
+langchain==0.3.23
+langchain-core==0.3.51
+langchain-community==0.3.21
+langchain-experimental==0.3.4
+langchain-openai==0.3.12
+langchain-text-splitters==0.3.8
+
+# LLM Providers
+openai==1.70.0
+
+# Web Crawling and HTTP
+httpx==0.28.1
+beautifulsoup4==4.13.3
+requests==2.32.3
+
+# PDF Processing
+pypdf==5.4.0
+
+# Environment and Configuration
+python-dotenv==1.1.0
+pydantic==2.11.2
+pydantic-settings==2.8.1
+
+# Utilities
+tiktoken==0.9.0
+tenacity==9.1.2
+
+# Optional but recommended
+langsmith==0.3.24

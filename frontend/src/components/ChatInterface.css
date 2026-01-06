@@ -1,0 +1,282 @@
+.chat-interface {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #0f0f23;
+}
+
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #2a2a4a;
+  background: #1a1a3a;
+}
+
+.chat-header h2 {
+  font-size: 1.2rem;
+  color: #fff;
+}
+
+.add-reference-button {
+  background: #2a2a4a;
+  border: 1px solid #3a3a5a;
+  color: #e0e0e0;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.add-reference-button:hover {
+  background: #3a3a5a;
+}
+
+.reference-input-panel {
+  padding: 1rem;
+  border-bottom: 1px solid #2a2a4a;
+  background: #1a1a3a;
+}
+
+.reference-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  background: #0f0f23;
+  border: 1px solid #2a2a4a;
+  border-radius: 6px;
+  color: #e0e0e0;
+  font-family: inherit;
+  font-size: 0.9rem;
+  resize: vertical;
+  margin-bottom: 0.5rem;
+}
+
+.reference-textarea:focus {
+  outline: none;
+  border-color: #4a4a6a;
+}
+
+.create-graph-button {
+  background: #4a90e2;
+  border: none;
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.create-graph-button:hover:not(:disabled) {
+  background: #5aa0f2;
+}
+
+.create-graph-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.messages-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.welcome-message {
+  text-align: center;
+  padding: 2rem;
+  color: #888;
+}
+
+.welcome-message h3 {
+  margin-bottom: 0.5rem;
+  color: #aaa;
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+  max-width: 80%;
+}
+
+.message.user {
+  align-self: flex-end;
+}
+
+.message.assistant,
+.message.system,
+.message.error {
+  align-self: flex-start;
+}
+
+.message-content {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.message-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.message-text {
+  flex: 1;
+}
+
+.message-body {
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+.message.user .message-body {
+  background: #4a90e2;
+  color: #fff;
+}
+
+.message.assistant .message-body {
+  background: #2a2a4a;
+  color: #e0e0e0;
+}
+
+.message.system .message-body {
+  background: #1a3a5a;
+  color: #a0d0ff;
+}
+
+.message.error .message-body {
+  background: #5a2a2a;
+  color: #ffa0a0;
+}
+
+.message-sources {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  font-size: 0.85rem;
+  color: #aaa;
+  background: #1a1a2a;
+  border-radius: 6px;
+}
+
+.message-sources a {
+  color: #4a90e2;
+  text-decoration: none;
+  margin: 0 0.5rem;
+}
+
+.message-sources a:hover {
+  text-decoration: underline;
+}
+
+.message-images {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.message-image {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid #2a2a4a;
+  transition: transform 0.2s;
+}
+
+.message-image:hover {
+  transform: scale(1.05);
+}
+
+.loading-dots {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.75rem 1rem;
+}
+
+.loading-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4a90e2;
+  animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.loading-dots span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.loading-dots span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes bounce {
+  0%, 80%, 100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}
+
+.input-container {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-top: 1px solid #2a2a4a;
+  background: #1a1a3a;
+}
+
+.message-input {
+  flex: 1;
+  padding: 0.75rem;
+  background: #0f0f23;
+  border: 1px solid #2a2a4a;
+  border-radius: 6px;
+  color: #e0e0e0;
+  font-family: inherit;
+  font-size: 0.9rem;
+  resize: none;
+  max-height: 120px;
+}
+
+.message-input:focus {
+  outline: none;
+  border-color: #4a4a6a;
+}
+
+.message-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.send-button {
+  background: #4a90e2;
+  border: none;
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.send-button:hover:not(:disabled) {
+  background: #5aa0f2;
+}
+
+.send-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

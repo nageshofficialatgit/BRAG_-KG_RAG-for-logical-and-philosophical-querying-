@@ -1,0 +1,46 @@
+.graph-visualization {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #0a0a1a;
+}
+
+.graph-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #2a2a4a;
+  background: #1a1a3a;
+}
+
+.graph-header h2 {
+  font-size: 1.2rem;
+  color: #fff;
+}
+
+.graph-stats {
+  font-size: 0.85rem;
+  color: #888;
+}
+
+.graph-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.empty-graph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #666;
+  text-align: center;
+  padding: 2rem;
+}
+
+.empty-graph p {
+  font-size: 0.9rem;
+  line-height: 1.5;
+}

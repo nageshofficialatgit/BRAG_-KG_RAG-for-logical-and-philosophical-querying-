@@ -2,7 +2,7 @@
 
 ## Current Setup
 
-The system is configured to use **gemma2:4b** as the default Ollama model.
+The system is configured to use **gemma3:4b** as the default Ollama model.
 
 ## Configuration
 
@@ -11,7 +11,7 @@ The system is configured to use **gemma2:4b** as the default Ollama model.
 Set in your `.env` file:
 
 ```env
-DEFAULT_OLLAMA_MODEL=gemma2:4b
+DEFAULT_OLLAMA_MODEL=gemma3:4b
 ```
 
 If your model has a different name (e.g., `gemma3:4b`), update it:
@@ -37,14 +37,14 @@ This means:
 ### Option 1: Update .env File
 
 ```env
-DEFAULT_OLLAMA_MODEL=gemma2:4b
+DEFAULT_OLLAMA_MODEL=gemma3:4b
 ```
 
 ### Option 2: Use Frontend Settings
 
 1. Click ⚙️ Settings
 2. Select "ollama" as provider
-3. Choose "gemma2:4b" from the model dropdown
+3. Choose "gemma3:4b" from the model dropdown
 
 ### Option 3: API Request
 
@@ -53,7 +53,7 @@ POST /api/rag/query
 {
   "question": "What is free will?",
   "llm_provider": "ollama",
-  "model": "gemma2:4b"
+  "model": "gemma3:4b"
 }
 ```
 
@@ -72,9 +72,9 @@ Or check in the frontend:
 ## Model Name Format
 
 Ollama model names can be:
-- `gemma2:4b` - Specific tag
-- `gemma2` - Latest tag
-- `gemma2:latest` - Explicit latest
+- `gemma3:4b` - Specific tag
+- `gemma3` - Latest tag
+- `gemma3:latest` - Explicit latest
 
 The system supports all formats.
 
@@ -94,7 +94,7 @@ The system supports all formats.
 
 3. **Pull model if needed:**
    ```bash
-   ollama pull gemma2:4b
+   ollama pull gemma3:4b
    ```
 
 ### Model Not Working
@@ -106,8 +106,8 @@ The system supports all formats.
 ## Default Models
 
 The system includes these in the fallback list:
-- gemma2:4b (default)
-- gemma2:2b
+- gemma3:4b (default)
+- gemma3:2b
 - llama3.2
 - llama3
 - mistral

@@ -203,3 +203,104 @@ DEFAULT_HEADERS = {
     "Accept-Encoding": "gzip, deflate",
     "Connection": "keep-alive",
 }
+# Prompt Templates
+class PromptTemplates:
+    """Reusable prompt templates for philosophy RAG"""
+    
+    PHILOSOPHY_RESPONSE_STRUCTURE = """You are an expert philosophy assistant with deep knowledge of philosophers, concepts, and arguments.
+
+QUESTION: {question}
+
+CONTEXT FROM REFERENCE MATERIALS:
+{context}
+
+INSTRUCTIONS FOR YOUR RESPONSE:
+1. **Start with Clarity**: Define key terms and concepts upfront
+2. **Historical Context**: Mention relevant philosophers and their positions
+3. **Arguments Structure**: 
+   - State the main position clearly
+   - Provide supporting arguments or evidence
+   - Acknowledge counterarguments
+4. **Use Markdown**:
+   - Use **bold** for key concepts
+   - Use ## for section headers
+   - Use > for important quotes or philosophical positions
+   - Use numbered lists for arguments
+5. **Cite Sources**: Reference philosophers and texts you're drawing from
+6. **Critical Analysis**: Don't just describe - analyze and evaluate
+
+REQUIRED RESPONSE FORMAT:
+## Main Concept
+[Definition and overview of the central idea]
+
+## Historical Development
+[How this concept evolved, key philosophers involved]
+
+## Key Arguments
+[Main supporting positions and reasoning]
+
+## Counterarguments
+[Common objections and alternative views]
+
+## Relevance
+[How this applies today or to the question]
+
+## Conclusion
+[Summary and synthesis]
+
+Now provide your comprehensive, well-structured answer:"""
+
+    IMPROVEMENT_PROMPT = """The following response to a philosophy question needs to be improved in structure and comprehensiveness.
+Please rewrite it to be more organized and better formatted with markdown.
+
+ORIGINAL RESPONSE:
+{response}
+
+ORIGINAL QUESTION:
+{question}
+
+AVAILABLE CONTEXT:
+{context}
+
+REQUIREMENTS:
+1. Use markdown headers (## for sections)
+2. Include at least 4-5 major sections
+3. Use **bold** for key concepts
+4. Explain philosopher names and their contributions
+5. Be comprehensive (300+ words minimum)
+6. Use > for important quotes
+7. Maintain accuracy to original response
+
+IMPROVED RESPONSE:"""
+
+    VALIDATION_PROMPT = """Evaluate this philosophy response for quality and relevance.
+Respond with JSON containing: answers_question (bool), accuracy_score (1-5), structure_score (1-5), improvements (list).
+
+QUESTION: {question}
+RESPONSE: {response}
+
+JSON:"""
+
+    FACTUAL_QUESTION_PROMPT = """You are a precise philosophy expert answering factual questions.
+Provide accurate, concise answers with definitions and key facts.
+
+QUESTION: {question}
+CONTEXT: {context}
+
+Answer:"""
+
+    ANALYTICAL_QUESTION_PROMPT = """You are a philosophy expert analyzing and evaluating philosophical ideas.
+Provide thoughtful analysis comparing different perspectives.
+
+QUESTION: {question}
+CONTEXT: {context}
+
+Answer:"""
+
+    CREATIVE_QUESTION_PROMPT = """You are a creative philosophy thinker exploring hypothetical scenarios and new ideas.
+Provide exploratory and speculative answers while grounding them in philosophical principles.
+
+QUESTION: {question}
+CONTEXT: {context}
+
+Answer:"""

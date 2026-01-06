@@ -48,6 +48,31 @@ class Settings:
     USER_AGENT_VERSION: str = os.getenv("USER_AGENT_VERSION", "1.0")
     USER_AGENT_URL: str = os.getenv("USER_AGENT_URL", "+https://github.com/your-repo; research bot")
     
+    # Output Quality Configuration
+    OUTPUT_MIN_QUALITY_SCORE: float = float(os.getenv("OUTPUT_MIN_QUALITY_SCORE", "0.6"))
+    OUTPUT_MIN_WORD_COUNT: int = int(os.getenv("OUTPUT_MIN_WORD_COUNT", "50"))
+    OUTPUT_IDEAL_WORD_COUNT: tuple = (150, 500)  # (good, excellent)
+    OUTPUT_QUALITY_THRESHOLD_IMPROVE: float = float(os.getenv("OUTPUT_QUALITY_THRESHOLD_IMPROVE", "0.6"))
+    
+    # Temperature Configuration (adaptive)
+    TEMPERATURE_FACTUAL: float = float(os.getenv("TEMPERATURE_FACTUAL", "0.2"))
+    TEMPERATURE_ANALYTICAL: float = float(os.getenv("TEMPERATURE_ANALYTICAL", "0.6"))
+    TEMPERATURE_CREATIVE: float = float(os.getenv("TEMPERATURE_CREATIVE", "0.8"))
+    TEMPERATURE_DEFAULT: float = float(os.getenv("TEMPERATURE_DEFAULT", "0.5"))
+    
+    # Context Configuration
+    MAX_CONTEXT_TOKENS: int = int(os.getenv("MAX_CONTEXT_TOKENS", "2000"))
+    MAX_CHAT_HISTORY_TOKENS: int = int(os.getenv("MAX_CHAT_HISTORY_TOKENS", "1000"))
+    CHAT_HISTORY_LIMIT: int = int(os.getenv("CHAT_HISTORY_LIMIT", "3"))
+    
+    # Confidence Scoring Configuration
+    CONFIDENCE_CONTEXT_WEIGHT: float = float(os.getenv("CONFIDENCE_CONTEXT_WEIGHT", "0.3"))
+    CONFIDENCE_SOURCE_WEIGHT: float = float(os.getenv("CONFIDENCE_SOURCE_WEIGHT", "0.2"))
+    CONFIDENCE_CITATION_WEIGHT: float = float(os.getenv("CONFIDENCE_CITATION_WEIGHT", "0.2"))
+    CONFIDENCE_COVERAGE_WEIGHT: float = float(os.getenv("CONFIDENCE_COVERAGE_WEIGHT", "0.3"))
+    CONFIDENCE_THRESHOLD_HIGH: float = float(os.getenv("CONFIDENCE_THRESHOLD_HIGH", "0.8"))
+    CONFIDENCE_THRESHOLD_MEDIUM: float = float(os.getenv("CONFIDENCE_THRESHOLD_MEDIUM", "0.6"))
+    
     @property
     def USER_AGENT(self) -> str:
         """Construct user agent string from components"""

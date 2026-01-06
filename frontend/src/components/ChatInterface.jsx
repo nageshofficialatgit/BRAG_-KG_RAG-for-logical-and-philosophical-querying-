@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import './ChatInterface.css'
 
 const API_BASE = '/api'
@@ -205,7 +207,32 @@ function ChatInterface({ onGraphUpdate, settings, selectedSources = [] }) {
                 </span>
                 
                 <div className="message-text">
-                  <div className="message-body">{msg.content}</div>
+                  <div className={`message-body ${msg.type === 'assistant' ? 'markdown-content' : ''}`}>
+                    {msg.type === 'assistant' ? (
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          h1: ({node, ...props}) => <h1 className="md-h1" {...props} />,
+                          h2: ({node, ...props}) => <h2 className="md-h2" {...props} />,
+                          h3: ({node, ...props}) => <h3 className="md-h3" {...props} />,
+                          h4: ({node, ...props}) => <h4 className="md-h4" {...props} />,
+                          p: ({node, ...props}) => <p className="md-p" {...props} />,
+                          ul: ({node, ...props}) => <ul className="md-ul" {...props} />,
+                          ol: ({node, ...props}) => <ol className="md-ol" {...props} />,
+                          li: ({node, ...props}) => <li className="md-li" {...props} />,
+                          blockquote: ({node, ...props}) => <blockquote className="md-blockquote" {...props} />,
+                          strong: ({node, ...props}) => <strong className="md-strong" {...props} />,
+                          em: ({node, ...props}) => <em className="md-em" {...props} />,
+                          code: ({node, inline, ...props}) => 
+                            inline ? <code className="md-code-inline" {...props} /> : <code className="md-code-block" {...props} />,
+                        }}
+                      >
+                        {msg.content}
+                      </ReactMarkdown>
+                    ) : (
+                      msg.content
+                    )}
+                  </div>
                   
                   {msg.sources && Object.keys(msg.sources).length > 0 && (
                     <motion.div 

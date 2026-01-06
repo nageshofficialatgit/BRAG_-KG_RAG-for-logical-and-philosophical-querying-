@@ -11,7 +11,7 @@ The system is configured to use **gemma3:4b** as the default Ollama model.
 Set in your `.env` file:
 
 ```env
-DEFAULT_OLLAMA_MODEL=gemma2:4b
+DEFAULT_OLLAMA_MODEL=gemma3:4b
 ```
 
 If your model has a different name (e.g., `gemma3:4b`), update it:

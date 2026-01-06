@@ -2,32 +2,76 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #0a0a1a;
+  background: var(--color-bg-secondary);
 }
 
 .graph-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
-  border-bottom: 1px solid #2a2a4a;
-  background: #1a1a3a;
+  padding: 1.25rem;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg-secondary);
+  box-shadow: var(--shadow-sm);
+  animation: slideDown 0.4s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .graph-header h2 {
-  font-size: 1.2rem;
-  color: #fff;
+  font-size: 1.1rem;
+  color: var(--color-text-primary);
+  font-family: 'Courier New', monospace;
+  font-weight: 500;
+  letter-spacing: 0.5px;
 }
 
 .graph-stats {
   font-size: 0.85rem;
-  color: #888;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  padding: 0.25rem 0.75rem;
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-light);
 }
 
 .graph-container {
   flex: 1;
   position: relative;
   overflow: hidden;
+  background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+}
+
+.gv-tooltip {
+  position: fixed;
+  z-index: 1200;
+  background: rgba(20, 20, 20, 0.95);
+  color: #fff;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  pointer-events: none;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  white-space: nowrap;
+}
+
+.graph-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border: none;
+  cursor: default;
 }
 
 .empty-graph {
@@ -35,12 +79,38 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: #666;
+  color: var(--color-text-secondary);
   text-align: center;
   padding: 2rem;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .empty-graph p {
+  color: var(--color-text-secondary);
   font-size: 0.9rem;
-  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .graph-header {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+  
+  .graph-stats {
+    width: 100%;
+  }
 }

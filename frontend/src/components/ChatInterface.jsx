@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
 import './ChatInterface.css'
 
@@ -115,104 +116,164 @@ function ChatInterface({ onGraphUpdate, settings, selectedSources = [] }) {
     }
   }
 
+  const messageVariants = {
+    initial: { opacity: 0, y: 10 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -10 }
+  }
+
   return (
     <div className="chat-interface">
       <div className="chat-header">
-        <h2>Chat</h2>
-        <button
+        <h2>╔─ Chat ─╗</h2>
+        <motion.button
           className="add-reference-button"
           onClick={() => setShowReferenceInput(!showReferenceInput)}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
-          {showReferenceInput ? '✕' : '+ Add Reference Text'}
-        </button>
+          {showReferenceInput ? '[−] Close' : '[+] Add Reference'}
+        </motion.button>
       </div>
 
-      {showReferenceInput && (
-        <div className="reference-input-panel">
-          <textarea
-            className="reference-textarea"
-            placeholder="Paste your reference text here (e.g., philosophy book content)..."
-            value={referenceText}
-            onChange={(e) => setReferenceText(e.target.value)}
-            rows={6}
-          />
-          <button
-            className="create-graph-button"
-            onClick={handleCreateGraph}
-            disabled={!referenceText.trim() || loading}
+      <AnimatePresence>
+        {showReferenceInput && (
+          <motion.div 
+            className="reference-input-panel"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
           >
-            {loading ? 'Creating...' : 'Create Knowledge Graph'}
-          </button>
-        </div>
-      )}
+            <textarea
+              className="reference-textarea"
+              placeholder="Paste your reference text here (e.g., philosophy book content)..."
+              value={referenceText}
+              onChange={(e) => setReferenceText(e.target.value)}
+              rows={6}
+            />
+            <motion.button
+              className="create-graph-button"
+              onClick={handleCreateGraph}
+              disabled={!referenceText.trim() || loading}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              {loading ? '⟳ Creating...' : '► Create Graph'}
+            </motion.button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="messages-container">
-        {messages.length === 0 && (
-          <div className="welcome-message">
-            <h3>Welcome to Knowledge Graph RAG</h3>
-            <p>Start by adding reference text or ask a question about philosophy!</p>
-          </div>
-        )}
-        
-        {messages.map((msg, idx) => (
-          <div key={idx} className={`message ${msg.type}`}>
-            <div className="message-content">
-              {msg.type === 'user' && <span className="message-icon">👤</span>}
-              {msg.type === 'assistant' && <span className="message-icon">🤖</span>}
-              {msg.type === 'system' && <span className="message-icon">ℹ️</span>}
-              {msg.type === 'error' && <span className="message-icon">⚠️</span>}
-              
-              <div className="message-text">
-                <div className="message-body">{msg.content}</div>
-                
-                {msg.sources && Object.keys(msg.sources).length > 0 && (
-                  <div className="message-sources">
-                    <strong>Sources:</strong>
-                    {msg.sources.knowledge_graph?.length > 0 && (
-                      <div>KG Entities: {msg.sources.knowledge_graph.join(', ')}</div>
-                    )}
-                    {msg.sources.web?.length > 0 && (
-                      <div>
-                        Web: {msg.sources.web.slice(0, 3).map((s, i) => (
-                          <a key={i} href={s.url} target="_blank" rel="noopener noreferrer">
-                            {s.title || s.url}
-                          </a>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {msg.images && msg.images.length > 0 && (
-                  <div className="message-images">
-                    {msg.images.map((img, i) => (
-                      <img
-                        key={i}
-                        src={img.thumbnail || img.url}
-                        alt={img.title || 'Image'}
-                        className="message-image"
-                        onClick={() => window.open(img.url, '_blank')}
-                      />
-                    ))}
-                  </div>
-                )}
+        <AnimatePresence mode="popLayout">
+          {messages.length === 0 && !loading && (
+            <motion.div 
+              className="welcome-message"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <h3>Welcome to Knowledge Graph RAG</h3>
+              <div className="welcome-ascii">
+{`╔═══════════════════════════════════════╗
+║   Start by adding reference text     ║
+║   or ask a question about your      ║
+║   knowledge domain!                 ║
+╚═══════════════════════════════════════╝`}
               </div>
-            </div>
-          </div>
-        ))}
-        
-        {loading && (
-          <div className="message assistant">
-            <div className="message-content">
-              <span className="message-icon">🤖</span>
-              <div className="message-text">
-                <div className="loading-dots">
-                  <span></span><span></span><span></span>
+            </motion.div>
+          )}
+          
+          {messages.map((msg, idx) => (
+            <motion.div 
+              key={idx} 
+              className={`message ${msg.type}`}
+              variants={messageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.2 }}
+            >
+              <div className="message-content">
+                <span className="message-icon">
+                  {msg.type === 'user' && '►'}
+                  {msg.type === 'assistant' && '◄'}
+                  {msg.type === 'system' && '◊'}
+                  {msg.type === 'error' && '✕'}
+                </span>
+                
+                <div className="message-text">
+                  <div className="message-body">{msg.content}</div>
+                  
+                  {msg.sources && Object.keys(msg.sources).length > 0 && (
+                    <motion.div 
+                      className="message-sources"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.2 }}
+                    >
+                      <strong>┌─ Sources ─┐</strong>
+                      {msg.sources.knowledge_graph?.length > 0 && (
+                        <div>KG: {msg.sources.knowledge_graph.join(', ')}</div>
+                      )}
+                      {msg.sources.web?.length > 0 && (
+                        <div>
+                          Web: {msg.sources.web.slice(0, 3).map((s, i) => (
+                            <a key={i} href={s.url} target="_blank" rel="noopener noreferrer">
+                              {s.title || s.url}
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </motion.div>
+                  )}
+
+                  {msg.images && msg.images.length > 0 && (
+                    <motion.div 
+                      className="message-images"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.2 }}
+                    >
+                      {msg.images.map((img, i) => (
+                        <motion.img
+                          key={i}
+                          src={img.thumbnail || img.url}
+                          alt={img.title || 'Image'}
+                          className="message-image"
+                          onClick={() => window.open(img.url, '_blank')}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        />
+                      ))}
+                    </motion.div>
+                  )}
                 </div>
               </div>
-            </div>
-          </div>
-        )}
+            </motion.div>
+          ))}
+          
+          {loading && (
+            <motion.div 
+              className="message assistant"
+              variants={messageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+            >
+              <div className="message-content">
+                <span className="message-icon">◄</span>
+                <div className="message-text">
+                  <div className="loading-dots">
+                    <span></span><span></span><span></span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
         
         <div ref={messagesEndRef} />
       </div>
@@ -227,13 +288,15 @@ function ChatInterface({ onGraphUpdate, settings, selectedSources = [] }) {
           rows={1}
           disabled={loading}
         />
-        <button
+        <motion.button
           className="send-button"
           onClick={handleSendMessage}
           disabled={!input.trim() || loading}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
-          Send
-        </button>
+          ►
+        </motion.button>
       </div>
     </div>
   )

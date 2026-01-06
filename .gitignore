@@ -43,3 +43,5 @@ Thumbs.db
 
 # Neo4j
 *.db/
+# Dump directory
+dump/

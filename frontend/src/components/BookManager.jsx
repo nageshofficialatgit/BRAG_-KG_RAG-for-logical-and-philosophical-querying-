@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
 import './BookManager.css'
 
@@ -114,94 +115,141 @@ function BookManager({ onBooksProcessed, selectedSources, onSourcesChange }) {
     }
   }
 
+  const containerVariants = {
+    initial: { opacity: 0 },
+    animate: { opacity: 1, transition: { staggerChildren: 0.05 } }
+  }
+
+  const itemVariants = {
+    initial: { opacity: 0, x: -10 },
+    animate: { opacity: 1, x: 0 }
+  }
+
   return (
     <div className="book-manager">
       <div className="book-manager-header">
-        <h3>Reference Books</h3>
+        <h3>┌─ Books ─┐</h3>
         <div className="book-manager-actions">
-          <button
+          <motion.button
             className="refresh-button"
             onClick={() => { loadBooks(); loadSources(); }}
             title="Refresh"
+            whileHover={{ scale: 1.1, rotate: 90 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 400 }}
           >
-            🔄
-          </button>
-          <button
+            ⟳
+          </motion.button>
+          <motion.button
             className="process-all-button"
             onClick={handleProcessAll}
             disabled={loading || books.length === 0}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
-            {loading ? 'Processing...' : 'Process All'}
-          </button>
+            {loading ? '⟳...' : '► All'}
+          </motion.button>
         </div>
       </div>
 
       <div className="sources-filter">
-        <h4>Filter by Source:</h4>
-        <div className="source-checkboxes">
-          <label>
+        <h4>┌─ Filter ─┐</h4>
+        <motion.div 
+          className="source-checkboxes"
+          variants={containerVariants}
+          initial="initial"
+          animate="animate"
+        >
+          <motion.label variants={itemVariants}>
             <input
               type="checkbox"
               checked={!selectedSources || selectedSources.length === 0}
               onChange={() => onSourcesChange([])}
             />
             All Sources
-          </label>
-          {sources.map(source => (
-            <label key={source.source}>
-              <input
-                type="checkbox"
-                checked={selectedSources?.includes(source.source) || false}
-                onChange={() => toggleSourceSelection(source.source)}
-              />
-              {source.source} ({source.nodes} nodes)
-            </label>
-          ))}
-        </div>
+          </motion.label>
+          <AnimatePresence>
+            {sources.map(source => (
+              <motion.label 
+                key={source.source}
+                variants={itemVariants}
+                initial="initial"
+                animate="animate"
+                exit={{ opacity: 0, x: -10 }}
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedSources?.includes(source.source) || false}
+                  onChange={() => toggleSourceSelection(source.source)}
+                />
+                {source.source} ({source.nodes})
+              </motion.label>
+            ))}
+          </AnimatePresence>
+        </motion.div>
       </div>
 
       <div className="books-list">
         {books.length === 0 ? (
-          <div className="empty-state">
-            <p>No books found in reference_texts folder.</p>
-            <p className="hint">Add .txt, .md, or .pdf files to the reference_texts folder.</p>
-          </div>
+          <motion.div 
+            className="empty-state"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <p>No books found</p>
+            <p className="hint">Add files to reference_texts/</p>
+          </motion.div>
         ) : (
-          books.map(book => {
-            const isProcessed = isSourceProcessed(book.name)
-            const stats = getSourceStats(book.name)
-            
-            return (
-              <div key={book.filename} className="book-item">
-                <div className="book-info">
-                  <div className="book-name">{book.name}</div>
-                  <div className="book-meta">
-                    {book.size_mb} MB • {book.extension.toUpperCase()}
-                    {isProcessed && stats && (
-                      <span className="processed-badge">
-                        ✓ {stats.nodes} nodes, {stats.relationships} rels
-                      </span>
-                    )}
+          <motion.div
+            variants={containerVariants}
+            initial="initial"
+            animate="animate"
+          >
+            {books.map(book => {
+              const isProcessed = isSourceProcessed(book.name)
+              const stats = getSourceStats(book.name)
+              
+              return (
+                <motion.div 
+                  key={book.filename} 
+                  className="book-item"
+                  variants={itemVariants}
+                  whileHover={{ x: 4 }}
+                >
+                  <div className="book-info">
+                    <div className="book-name">▪ {book.name}</div>
+                    <div className="book-meta">
+                      {book.size_mb} MB • {book.extension.toUpperCase()}
+                      {isProcessed && stats && (
+                        <span className="processed-badge">
+                          ✓ {stats.nodes}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-                <div className="book-actions">
-                  <button
-                    className={`process-button ${isProcessed ? 'processed' : ''}`}
-                    onClick={() => handleProcessBook(book.filename)}
-                    disabled={processing[book.filename]}
-                  >
-                    {processing[book.filename] ? 'Processing...' : isProcessed ? 'Reprocess' : 'Process'}
-                  </button>
-                  <button
-                    className="delete-button"
-                    onClick={() => handleDeleteBook(book.filename)}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            )
-          })
+                  <div className="book-actions">
+                    <motion.button
+                      className={`process-button ${isProcessed ? 'processed' : ''}`}
+                      onClick={() => handleProcessBook(book.filename)}
+                      disabled={processing[book.filename]}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      {processing[book.filename] ? '⟳' : isProcessed ? '↻' : '►'}
+                    </motion.button>
+                    <motion.button
+                      className="delete-button"
+                      onClick={() => handleDeleteBook(book.filename)}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      ✕
+                    </motion.button>
+                  </div>
+                </motion.div>
+              )
+            })}
+          </motion.div>
         )}
       </div>
     </div>

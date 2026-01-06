@@ -302,9 +302,4 @@ The modular structure makes it easy to:
 
 This project is open source and available for educational and research purposes.
 
-## Acknowledgments
 
-- Neo4j for graph database
-- LangChain for RAG framework
-- React Force Graph for visualization
-- Ollama for local LLM support

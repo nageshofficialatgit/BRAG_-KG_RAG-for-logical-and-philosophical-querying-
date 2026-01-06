@@ -2,6 +2,27 @@
 
 A comprehensive Knowledge Graph RAG (Retrieval-Augmented Generation) system with web crawling, image retrieval, and an interactive React dashboard. Perfect for philosophy research, book analysis, and contextual knowledge exploration.
 
+## 📖 Documentation Index
+
+### Memory & Conversation (🆕 NEW)
+- **[MEMORY_README.md](MEMORY_README.md)** - Complete memory implementation guide  
+- [MEMORY_ONE_PAGE.md](MEMORY_ONE_PAGE.md) - Quick one-page reference
+- [MEMORY_EXECUTIVE_SUMMARY.md](MEMORY_EXECUTIVE_SUMMARY.md) - Direct answers to your questions
+- [MEMORY_ANALYSIS.md](MEMORY_ANALYSIS.md) - Analysis of memory strategies
+- [MEMORY_COMPLETE_REFERENCE.md](MEMORY_COMPLETE_REFERENCE.md) - All alternatives detailed
+- [MEMORY_VISUAL_GUIDE.md](MEMORY_VISUAL_GUIDE.md) - Architecture diagrams
+- [MEMORY_QUICKSTART.md](MEMORY_QUICKSTART.md) - Implementation guide
+
+### Getting Started
+- [QUICKSTART.md](QUICKSTART.md) - Setup and first run
+- [OLLAMA_SETUP.md](OLLAMA_SETUP.md) - Local LLM configuration
+
+### System Architecture & Features
+- [ENHANCED_SERVICES.md](ENHANCED_SERVICES.md) - Enhanced backend services
+- [PHILOSOPHY_SEARCH_ENHANCEMENT.md](PHILOSOPHY_SEARCH_ENHANCEMENT.md) - Philosophy-specific search
+- [REFERENCE_TEXTS_GUIDE.md](REFERENCE_TEXTS_GUIDE.md) - Reference text management
+- [ROBOTS_TXT_COMPLIANCE.md](ROBOTS_TXT_COMPLIANCE.md) - Web crawler compliance
+
 ## Features
 
 ### 🎯 Core Capabilities
@@ -12,6 +33,10 @@ A comprehensive Knowledge Graph RAG (Retrieval-Augmented Generation) system with
 4. **Dual LLM Support** - Use OpenAI API or local Ollama models
 5. **Image Retrieval** - Fetches relevant images for queries
 6. **Context-Aware Responses** - Combines reference text and web sources for comprehensive answers
+7. **Persistent Conversation Memory** - 🆕 Auto-extracts philosophers & concepts, stores in Neo4j
+8. **Output Quality Processing** - 🆕 Multi-factor quality scoring and auto-improvement
+9. **Confidence Scoring** - 🆕 Reliability assessment across multiple dimensions
+10. **Dynamic Prompts** - 🆕 Decoupled, modifiable prompts (Microsoft GraphRAG pattern)
 
 ### 📚 Philosophy Book Use Case
 
@@ -20,6 +45,9 @@ Perfect for reading philosophy books where you need:
 - Summarized information from both reference text and latest web sources
 - Visual representation of how concepts and philosophers are related
 - Image retrieval for philosophers and concepts
+- **Persistent conversation memory** that remembers philosophers discussed
+- **Automatic extraction** and linking of philosophical concepts
+- **Quality assessment** of generated responses
 
 ## Project Structure
 
@@ -28,6 +56,14 @@ BRAG/
 ├── backend/                    # FastAPI backend
 │   ├── main.py                # FastAPI application entry point
 │   ├── config.py              # Configuration settings
+│   ├── prompts/               # 🆕 Decoupled prompt templates (GraphRAG pattern)
+│   │   ├── philosophy_response.txt
+│   │   ├── factual_question.txt
+│   │   ├── analytical_question.txt
+│   │   ├── creative_question.txt
+│   │   ├── improvement.txt
+│   │   ├── validation.txt
+│   │   └── README.md
 │   ├── routers/               # API route handlers
 │   │   ├── kg.py              # Knowledge graph endpoints
 │   │   ├── rag.py             # RAG query endpoints
@@ -36,21 +72,27 @@ BRAG/
 │   └── services/              # Business logic services
 │       ├── kg_service.py      # Knowledge graph operations
 │       ├── rag_service.py     # RAG pipeline
+│       ├── llm_service.py     # LLM abstraction (OpenAI/Ollama)
 │       ├── web_crawler_service.py  # Web crawling
 │       ├── image_service.py   # Image retrieval
-│       └── llm_service.py     # LLM abstraction (OpenAI/Ollama)
+│       ├── prompt_loader.py   # 🆕 Dynamic prompt loading
+│       ├── output_processor.py    # 🆕 Output quality processing
+│       ├── confidence_scorer.py   # 🆕 Confidence scoring
+│       └── conversation_memory_service.py  # 🆕 Persistent memory
 ├── frontend/                   # React frontend
 │   ├── src/
-│   │   ├── App.jsx            # Main app component
+│   │   ├── App.jsx            # Main app component (white theme, animations)
 │   │   └── components/
-│   │       ├── ChatInterface.jsx      # Chat UI
-│   │       ├── GraphVisualization.jsx # Graph visualization
+│   │       ├── ChatInterface.jsx      # Chat UI (markdown rendering)
+│   │       ├── GraphVisualization.jsx # Interactive graph visualization
 │   │       └── SettingsPanel.jsx      # Settings UI
 │   ├── package.json
 │   └── vite.config.js
-├── healthcare/                 # Legacy healthcare examples
-├── kgraph_rag/                # Legacy RAG examples
-├── simple_kg/                 # Legacy simple KG examples
+├── Docs/                       # Documentation
+│   ├── README.md              # This file
+│   ├── MEMORY_*.md            # Memory implementation guides
+│   ├── QUICKSTART.md          # Setup guide
+│   └── ...                    # Other docs
 └── requirements.txt           # Python dependencies
 ```
 

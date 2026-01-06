@@ -17,6 +17,21 @@ class Settings:
     DEFAULT_LLM_PROVIDER: str = os.getenv("DEFAULT_LLM_PROVIDER", "ollama")
     DEFAULT_OLLAMA_MODEL: str = os.getenv("DEFAULT_OLLAMA_MODEL", "gemma3:4b")  # Change to your model name if different
     
+    # Available LLM Models (decoupled from router hardcoding)
+    DEFAULT_OLLAMA_FALLBACK_MODELS: list = [
+        "gemma3:4b",
+        "llama3.2",
+        "llama3",
+        "mistral",
+        "phi3",
+        "gemma2:2b"
+    ]
+    AVAILABLE_OPENAI_MODELS: list = [
+        "gpt-4o-mini",
+        "gpt-4",
+        "gpt-3.5-turbo"
+    ]
+    
     # Web Crawler Configuration
     MAX_SEARCH_RESULTS: int = int(os.getenv("MAX_SEARCH_RESULTS", "5"))
     CRAWL_TIMEOUT: int = int(os.getenv("CRAWL_TIMEOUT", "10"))
@@ -72,6 +87,17 @@ class Settings:
     CONFIDENCE_COVERAGE_WEIGHT: float = float(os.getenv("CONFIDENCE_COVERAGE_WEIGHT", "0.3"))
     CONFIDENCE_THRESHOLD_HIGH: float = float(os.getenv("CONFIDENCE_THRESHOLD_HIGH", "0.8"))
     CONFIDENCE_THRESHOLD_MEDIUM: float = float(os.getenv("CONFIDENCE_THRESHOLD_MEDIUM", "0.6"))
+    
+    # Conversation Memory Configuration
+    MEMORY_MAX_HISTORY: int = int(os.getenv("MEMORY_MAX_HISTORY", "15"))
+    MEMORY_ENABLE_ARCHIVAL: bool = os.getenv("MEMORY_ENABLE_ARCHIVAL", "true").lower() == "true"
+    MEMORY_ENABLE_IMPORTANCE_SCORING: bool = os.getenv("MEMORY_ENABLE_IMPORTANCE_SCORING", "true").lower() == "true"
+    MEMORY_SESSION_ID_PREFIX: str = os.getenv("MEMORY_SESSION_ID_PREFIX", "session")
+    
+    # Router Configuration
+    ROUTER_DEFAULT_INCLUDE_WEB: bool = os.getenv("ROUTER_DEFAULT_INCLUDE_WEB", "true").lower() == "true"
+    ROUTER_DEFAULT_INCLUDE_IMAGES: bool = os.getenv("ROUTER_DEFAULT_INCLUDE_IMAGES", "true").lower() == "true"
+    ROUTER_SESSION_CONTEXT_MAX_TOKENS: int = int(os.getenv("ROUTER_SESSION_CONTEXT_MAX_TOKENS", "2000"))
     
     @property
     def USER_AGENT(self) -> str:

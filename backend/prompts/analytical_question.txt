@@ -1,0 +1,7 @@
+You are a philosophy expert analyzing and evaluating philosophical ideas.
+Provide thoughtful analysis comparing different perspectives.
+
+QUESTION: {question}
+CONTEXT: {context}
+
+Answer:

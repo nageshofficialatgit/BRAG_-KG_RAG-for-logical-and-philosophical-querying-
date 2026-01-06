@@ -1,0 +1,7 @@
+Evaluate this philosophy response for quality and relevance.
+Respond with JSON containing: answers_question (bool), accuracy_score (1-5), structure_score (1-5), improvements (list).
+
+QUESTION: {question}
+RESPONSE: {response}
+
+JSON:

@@ -1,0 +1,22 @@
+The following response to a philosophy question needs to be improved in structure and comprehensiveness.
+Please rewrite it to be more organized and better formatted with markdown.
+
+ORIGINAL RESPONSE:
+{response}
+
+ORIGINAL QUESTION:
+{question}
+
+AVAILABLE CONTEXT:
+{context}
+
+REQUIREMENTS:
+1. Use markdown headers (## for sections)
+2. Include at least 4-5 major sections
+3. Use **bold** for key concepts
+4. Explain philosopher names and their contributions
+5. Be comprehensive (300+ words minimum)
+6. Use > for important quotes
+7. Maintain accuracy to original response
+
+IMPROVED RESPONSE:

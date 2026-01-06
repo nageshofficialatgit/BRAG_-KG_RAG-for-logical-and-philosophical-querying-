@@ -10,7 +10,8 @@ from backend.services.image_service import ImageService
 from backend.services.llm_service import LLMService
 from backend.services.output_processor import OutputProcessor
 from backend.services.confidence_scorer import ConfidenceScorer
-from backend.constants import PromptTemplates
+from backend.services.prompt_loader import PromptLoader
+from backend.services.conversation_memory_service import ConversationMemoryService
 from backend.config import settings
 import logging
 
@@ -24,7 +25,9 @@ class RAGService:
         image_service: ImageService,
         llm_service: LLMService,
         output_processor: Optional[OutputProcessor] = None,
-        confidence_scorer: Optional[ConfidenceScorer] = None
+        confidence_scorer: Optional[ConfidenceScorer] = None,
+        prompt_loader: Optional[PromptLoader] = None,
+        memory_service: Optional[ConversationMemoryService] = None
     ):
         self.kg_service = kg_service
         self.web_crawler = web_crawler
@@ -34,6 +37,8 @@ class RAGService:
         # Inject services or create defaults
         self.output_processor = output_processor or OutputProcessor(llm_service)
         self.confidence_scorer = confidence_scorer or ConfidenceScorer()
+        self.prompt_loader = prompt_loader or PromptLoader()
+        self.memory_service = memory_service  # Optional - provide for conversation context
         
         self.vector_index = None
         self._initialize_vector_index()
@@ -59,13 +64,33 @@ class RAGService:
         chat_history: List[Tuple[str, str]] = None,
         include_web: bool = True,
         include_images: bool = True,
-        sources: Optional[List[str]] = None
+        sources: Optional[List[str]] = None,
+        session_id: Optional[str] = None
     ) -> Dict[str, Any]:
-        """Main RAG query function with improved output processing"""
+        """Main RAG query function with conversation memory and improved output processing"""
         errors = {}
         contexts = {}
+        memory_context = ""
+        archival_info = None
         
         try:
+            # 0. Get conversation context from memory if available
+            if self.memory_service and session_id:
+                try:
+                    memory_data = await self.memory_service.get_conversation_context(
+                        query=question,
+                        max_tokens=settings.MAX_CONTEXT_TOKENS // 2  # Use half for memory
+                    )
+                    memory_context = memory_data.get("context", "")
+                    archival_info = {
+                        "active_exchanges": memory_data.get("active_exchanges", 0),
+                        "archived_exchanges": memory_data.get("archived_exchanges", 0),
+                        "important_entities": memory_data.get("important_entities", []),
+                        "optimization_applied": memory_data.get("optimization_applied")
+                    }
+                except Exception as e:
+                    logger.warning(f"Could not retrieve memory context: {e}")
+            
             # 1. Get context from knowledge graph
             try:
                 contexts["kg"] = self._get_kg_context(question, sources=sources)
@@ -94,24 +119,39 @@ class RAGService:
                 except Exception as e:
                     logger.warning(f"Image search failed: {e}")
             
-            # 4. Combine contexts with size limits
+            # 4. Combine contexts with size limits (memory gets priority)
             combined_context = self._combine_contexts(
-                contexts.get("kg", {}),
-                contexts.get("web", {}),
+                kg_context=contexts.get("kg", {}),
+                web_context=contexts.get("web", {}),
+                memory_context=memory_context,
                 max_tokens=settings.MAX_CONTEXT_TOKENS
             )
             
-            # 5. Generate response with improved prompt
+            # 5. Generate response with improved prompt and conversation context
             raw_response = await self._generate_response(
-                question, combined_context, chat_history
+                question, combined_context, chat_history, memory_context=memory_context
             )
             
-            # 6. Post-process response for quality
+            # 6. Save to conversation memory if available
+            if self.memory_service and session_id:
+                try:
+                    memory_result = await self.memory_service.add_exchange(
+                        question=question,
+                        answer=raw_response,
+                        metadata={
+                            "sources": contexts.keys(),
+                            "has_images": len(images) > 0
+                        }
+                    )
+                except Exception as e:
+                    logger.warning(f"Could not save to memory: {e}")
+            
+            # 7. Post-process response for quality
             processed = await self.output_processor.process_response(
                 raw_response, question, combined_context
             )
             
-            # 7. Calculate confidence score
+            # 8. Calculate confidence score
             context_quality = self._estimate_context_quality(contexts)
             sources_used = (len(contexts.get("kg", {}).get("entities", [])) + 
                           len(contexts.get("web", {}).get("sources", [])))
@@ -127,7 +167,7 @@ class RAGService:
                 is_improved=processed["was_improved"]
             )
             
-            # 8. Get graph visualization
+            # 9. Get graph visualization
             graph_data = self.kg_service.get_graph_for_visualization(question)
             
             return {
@@ -144,14 +184,17 @@ class RAGService:
                     "sections": processed["sections"],
                     "key_concepts": processed["key_concepts"],
                     "citations": processed["citations"],
-                    "quality_score": processed["quality_score"]
+                    "quality_score": processed["quality_score"],
+                    "memory": archival_info
                 },
                 "retrieval_methods_used": {
                     "graph": bool(contexts.get("kg")),
                     "web": bool(contexts.get("web")),
-                    "vector_search": self.vector_index is not None
+                    "vector_search": self.vector_index is not None,
+                    "conversation_memory": bool(memory_context)
                 },
-                "errors": errors if errors else None
+                "errors": errors if errors else None,
+                "session_id": session_id
             }
         except Exception as e:
             logger.error(f"Error in RAG query: {str(e)}")
@@ -163,7 +206,8 @@ class RAGService:
                 "confidence": self.confidence_scorer.score(
                     "", context_quality=0.0, sources_count=0
                 ),
-                "error": str(e)
+                "error": str(e),
+                "session_id": session_id
             }
     
     def _get_kg_context(
@@ -219,20 +263,28 @@ class RAGService:
         self,
         kg_context: Dict[str, Any],
         web_context: Dict[str, Any],
+        memory_context: str = "",
         max_tokens: int = 2000
     ) -> str:
-        """Combine knowledge graph and web contexts with token limits"""
+        """Combine memory, knowledge graph, and web contexts with token limits"""
         parts = []
         current_length = 0
         max_chars = max_tokens * 4  # Rough approximation
         
-        # Add KG context first (usually most relevant for philosophy)
+        # Add memory context first (most relevant for conversation continuation)
+        if memory_context and current_length < max_chars:
+            memory_text = memory_context[:max(100, max_chars - current_length)]
+            parts.append("CONVERSATION CONTEXT:")
+            parts.append(memory_text)
+            current_length += len(memory_text)
+        
+        # Add KG context (usually most relevant for philosophy)
         if kg_context.get("text"):
             kg_text = kg_context["text"]
             # Truncate if needed
             if current_length + len(kg_text) > max_chars:
                 kg_text = kg_text[:max(100, max_chars - current_length)]
-            parts.append("REFERENCE TEXT CONTEXT:")
+            parts.append("\nREFERENCE TEXT CONTEXT:")
             parts.append(kg_text)
             current_length += len(kg_text)
         
@@ -251,21 +303,20 @@ class RAGService:
         self,
         question: str,
         context: str,
-        chat_history: List[Tuple[str, str]] = None
+        chat_history: List[Tuple[str, str]] = None,
+        memory_context: str = ""
     ) -> str:
         """Generate response using LLM with philosophy-specific prompt"""
         try:
             # Determine question type to select appropriate prompt
             question_type = self._classify_question(question)
             
-            # Select prompt template based on question type
-            if question_type == "factual":
-                prompt_template = PromptTemplates.PHILOSOPHY_RESPONSE_STRUCTURE
-            else:
-                prompt_template = PromptTemplates.PHILOSOPHY_RESPONSE_STRUCTURE
+            # Select prompt file based on question type
+            prompt_name = self._get_prompt_name(question_type)
             
-            # Build prompt
-            prompt_text = prompt_template.format(
+            # Load and format prompt from external file
+            prompt_text = self.prompt_loader.format_prompt(
+                prompt_name,
                 question=question,
                 context=context
             )
@@ -275,6 +326,10 @@ class RAGService:
                 history_context = self._prepare_chat_history(chat_history)
                 if history_context:
                     prompt_text = f"Previous conversation context:\n{history_context}\n\n{prompt_text}"
+            
+            # Add memory-based context if available
+            if memory_context:
+                prompt_text = f"Recent conversation history:\n{memory_context}\n\n{prompt_text}"
             
             # Generate response with adaptive temperature
             # (temperature handling will be in LLMService)
@@ -301,6 +356,15 @@ class RAGService:
         return "analytical"  # Default
     
     def _prepare_chat_history(
+    
+    def _get_prompt_name(self, question_type: str) -> str:
+        """Map question type to prompt file name"""
+        prompt_map = {
+            "factual": "factual_question",
+            "analytical": "analytical_question",
+            "creative": "creative_question",
+        }
+        return prompt_map.get(question_type, "analytical_question")
         self,
         chat_history: List[Tuple[str, str]],
         max_tokens: int = None

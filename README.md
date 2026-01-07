@@ -442,52 +442,6 @@ For philosophy books, it's optimized to recognize:
 - Works (books, essays, treatises)
 - Relationships (influences, contradicts, builds on, etc.)
 
-## Recent Improvements
-
-### Conversation Memory System (v2.0)
-
-**New Features**:
-- ✅ **Per-session conversation memory** - Each session maintains independent conversation history
-- ✅ **Automatic entity importance tracking** - Philosophers and concepts mentioned 3+ times are preserved
-- ✅ **Memory archival system** - Prevents pile-up by archiving old exchanges while preserving important entities
-- ✅ **Token-aware context optimization** - Smart truncation using tiktoken (GPT-4 encoding)
-- ✅ **Catastrophic forgetting prevention** - Important entities never lost even when archiving
-- ✅ **Session health monitoring** - Track memory status, archival count, and entity importance
-
-**Benefits**:
-- Conversations remain coherent across many exchanges
-- System won't lose track of key philosophers or concepts
-- Automatic memory management prevents context overflow
-- Each user conversation completely isolated
-
-### Backend Architecture Improvements (v1.5)
-
-**Service Refactoring**:
-- ✅ **OutputProcessor** - Quality scoring and automatic response improvement
-- ✅ **ConfidenceScorer** - Multi-factor confidence assessment with configurable weights
-- ✅ **PromptLoader** - Dynamic prompt loading from external files (decoupled from code)
-- ✅ **ConversationMemoryService** - Entity extraction and conversation memory management
-- ✅ **RAGService enhancements** - Dependency injection for all services
-
-**Dependency Management**:
-- ✅ **LangChain 0.3+ compatible** - Uses `langchain_community.memory.kg.ConversationKGMemory`
-- ✅ **All imports verified** - Compatible with langchain-neo4j 0.4.0, langchain-openai 0.3.12
-- ✅ **Token counting** - Integrated tiktoken for accurate context length management
-
-### Configuration & Decoupling (v1.4)
-
-**Moved to Config**:
-- ✅ **All model definitions** - DEFAULT_OLLAMA_FALLBACK_MODELS, AVAILABLE_OPENAI_MODELS
-- ✅ **Memory settings** - MEMORY_MAX_HISTORY, MEMORY_ENABLE_ARCHIVAL, etc.
-- ✅ **Router defaults** - ROUTER_DEFAULT_INCLUDE_WEB, ROUTER_DEFAULT_INCLUDE_IMAGES
-- ✅ **Temperature settings** - Per-question-type temperature adaptation
-- ✅ **Quality thresholds** - All quality scoring weights
-- ✅ **Context limits** - Token limits and history sizes
-
-**No More Hardcoding**:
-- Router uses config values (no hardcoded "gemma3:4b" etc.)
-- All defaults configurable via environment variables
-- Easy customization for different deployments
 
 ## Troubleshooting
 
@@ -540,5 +494,6 @@ The modular structure makes it easy to:
 ## License
 
 This project is open source and available for educational and research purposes.
+
 
 

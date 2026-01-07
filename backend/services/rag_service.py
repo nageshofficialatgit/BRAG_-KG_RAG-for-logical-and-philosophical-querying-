@@ -355,8 +355,6 @@ class RAGService:
         
         return "analytical"  # Default
     
-    def _prepare_chat_history(
-    
     def _get_prompt_name(self, question_type: str) -> str:
         """Map question type to prompt file name"""
         prompt_map = {
@@ -365,6 +363,8 @@ class RAGService:
             "creative": "creative_question",
         }
         return prompt_map.get(question_type, "analytical_question")
+
+    def _prepare_chat_history(
         self,
         chat_history: List[Tuple[str, str]],
         max_tokens: int = None

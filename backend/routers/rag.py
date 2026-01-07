@@ -188,16 +188,53 @@ async def get_llm_providers():
     """Get available LLM providers with dynamic Ollama model detection"""
     # Try to get available Ollama models dynamically, fallback to defaults from config
     ollama_models = settings.DEFAULT_OLLAMA_FALLBACK_MODELS.copy()
+    # Try both /api/models and older /api/tags endpoints for compatibility
+    endpoints = ["/api/models", "/api/tags"]
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.get(
-                f"{settings.OLLAMA_BASE_URL}/api/tags",
-                timeout=5.0
-            )
-            if response.status_code == 200:
-                data = response.json()
-                ollama_models = [model.get("name", "") for model in data.get("models", [])]
-                logger.info(f"Detected Ollama models: {ollama_models}")
+            parsed = []
+            for ep in endpoints:
+                try:
+                    response = await client.get(f"{settings.OLLAMA_BASE_URL}{ep}", timeout=3.0)
+                except Exception:
+                    continue
+                if response.status_code != 200:
+                    continue
+                try:
+                    data = response.json()
+                except Exception:
+                    # fallback to text list
+                    text = response.text or ""
+                    items = [l.strip() for l in text.splitlines() if l.strip()]
+                    parsed = parsed + items
+                    continue
+
+                # Support several response shapes
+                if isinstance(data, dict):
+                    models_list = data.get("models") or data.get("data") or data.get("tags") or []
+                elif isinstance(data, list):
+                    models_list = data
+                else:
+                    models_list = []
+
+                for m in models_list:
+                    if isinstance(m, dict):
+                        name = m.get("name") or m.get("id") or m.get("tag") or str(m)
+                    else:
+                        name = str(m)
+                    if name:
+                        parsed.append(name)
+
+            if parsed:
+                # dedupe preserving order
+                seen = set()
+                deduped = []
+                for p in parsed:
+                    if p not in seen:
+                        deduped.append(p)
+                        seen.add(p)
+                ollama_models = deduped
+            logger.info(f"Detected Ollama models: {ollama_models}")
     except Exception as e:
         logger.warning(f"Could not fetch Ollama models dynamically: {e}, using defaults from config")
     

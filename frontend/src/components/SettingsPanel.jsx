@@ -26,8 +26,17 @@ function SettingsPanel({ settings, onSettingsChange, onClose }) {
 
   const checkOllama = async () => {
     try {
-      const response = await fetch('http://localhost:11434/api/tags')
-      setOllamaAvailable(response.ok)
+      // Try both modern and legacy endpoints
+      let ok = false
+      for (const ep of ['/api/models', '/api/tags']) {
+        try {
+          const response = await fetch(`http://localhost:11434${ep}`)
+          if (response.ok) { ok = true; break }
+        } catch (e) {
+          // ignore and try next
+        }
+      }
+      setOllamaAvailable(ok)
     } catch (error) {
       setOllamaAvailable(false)
     }

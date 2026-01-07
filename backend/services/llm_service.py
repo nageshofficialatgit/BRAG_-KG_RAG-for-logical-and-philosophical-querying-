@@ -37,11 +37,15 @@ class LLMService:
             return False
         try:
             async with httpx.AsyncClient() as client:
-                response = await client.get(
-                    f"{settings.OLLAMA_BASE_URL}/api/tags",
-                    timeout=5.0
-                )
-                return response.status_code == 200
+                # Try both common endpoints
+                for ep in ("/api/models", "/api/tags"):
+                    try:
+                        response = await client.get(f"{settings.OLLAMA_BASE_URL}{ep}", timeout=3.0)
+                        if response.status_code == 200:
+                            return True
+                    except Exception:
+                        continue
+                return False
         except Exception:
             return False
     

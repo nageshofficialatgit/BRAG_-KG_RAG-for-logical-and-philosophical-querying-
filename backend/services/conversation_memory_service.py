@@ -20,6 +20,7 @@ import logging
 from langchain_community.memory.kg import ConversationKGMemory
 from langchain_core.language_models import BaseLanguageModel
 from langchain_neo4j import Neo4jGraph
+from langchain_community.graphs.networkx_graph import NetworkxEntityGraph
 from backend.config import settings
 
 logger = logging.getLogger(__name__)
@@ -61,10 +62,65 @@ class ConversationMemoryService:
         self.enable_archival = enable_archival
         self.enable_importance_scoring = enable_importance_scoring
         
-        # Initialize LangChain KG memory
+        # Create a Networkx-backed graph that also persists to Neo4j
+        class Neo4jBackedNetworkxGraph(NetworkxEntityGraph):
+            def __init__(self, neo4j_graph: Neo4jGraph, session_id: Optional[str] = None):
+                super().__init__()
+                self.neo4j_graph = neo4j_graph
+                self.session_id = session_id
+
+            def add_triple(self, knowledge_triple):
+                # Add to in-memory networkx graph
+                try:
+                    super().add_triple(knowledge_triple)
+                except Exception:
+                    pass
+
+                # Persist to Neo4j (use generic relationship type, store predicate as property)
+                try:
+                    subj = getattr(knowledge_triple, 'subject', None)
+                    pred = getattr(knowledge_triple, 'predicate', None)
+                    obj = getattr(knowledge_triple, 'object_', None) or getattr(knowledge_triple, 'object', None)
+                    if subj and obj:
+                        self.neo4j_graph.query(
+                            '''
+                            MERGE (a:Entity {name: $subj})
+                            MERGE (b:Entity {name: $obj})
+                            MERGE (a)-[r:RELATED]->(b)
+                            SET r.predicate = $pred, r.conversation_id = $session_id
+                            RETURN id(r) as rid
+                            ''',
+                            {"subj": subj, "obj": obj, "pred": pred, "session_id": self.session_id}
+                        )
+                except Exception:
+                    logger.exception('Failed to persist triple to Neo4j')
+
+            def get_entity_knowledge(self, entity: str, depth: int = 1):
+                # Prefer fetching from Neo4j for up-to-date KG
+                try:
+                    rows = self.neo4j_graph.query(
+                        '''
+                        MATCH (a {name: $entity})-[r]->(b)
+                        RETURN a.name as a, type(r) as rel, b.name as b
+                        LIMIT $limit
+                        ''',
+                        {"entity": entity, "limit": depth * 10}
+                    ) or []
+                    results = [f"{r['a']} {r['rel']} {r['b']}" for r in rows if r.get('a') and r.get('b')]
+                    if results:
+                        return results
+                except Exception:
+                    logger.debug('Neo4j fetch for entity knowledge failed, falling back to local graph')
+
+                # Fallback to in-memory networkx behavior
+                return super().get_entity_knowledge(entity, depth=depth)
+
+        networkx_kg = Neo4jBackedNetworkxGraph(neo4j_graph=neo4j_graph, session_id=self.session_id)
+
+        # Initialize LangChain KG memory using Networkx-backed adapter
         self.kg_memory = ConversationKGMemory(
             llm=llm,
-            kg=neo4j_graph,
+            kg=networkx_kg,
             return_messages=True,
             max_history=max_history,
             entity_types=["Philosopher", "Concept", "Theory", "Argument"],

@@ -7,9 +7,14 @@ from pypdf import PdfReader
 logger = logging.getLogger(__name__)
 
 class ReferenceService:
-    def __init__(self, reference_folder: str = "reference_texts"):
-        self.reference_folder = Path(reference_folder)
-        self.reference_folder.mkdir(exist_ok=True)
+    def __init__(self, reference_folder: str = None):
+        # Make reference folder deterministic relative to repository root
+        if reference_folder:
+            self.reference_folder = Path(reference_folder)
+        else:
+            # Resolve to repository root (three levels up from this file)
+            self.reference_folder = Path(__file__).resolve().parent.parent.parent / "reference_texts"
+        self.reference_folder.mkdir(parents=True, exist_ok=True)
         self.supported_extensions = {'.txt', '.md', '.pdf'}
     
     def get_all_books(self) -> List[Dict[str, Any]]:

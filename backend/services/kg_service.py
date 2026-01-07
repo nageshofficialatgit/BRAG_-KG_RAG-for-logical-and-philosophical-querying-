@@ -24,6 +24,7 @@ class KnowledgeGraphService:
             username=settings.NEO4J_USERNAME,
             password=settings.NEO4J_PASSWORD,
         )
+        self.neo4j_graph = self.kg
         self.llm_service = llm_service
     
     def create_graph_from_text(

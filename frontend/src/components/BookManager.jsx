@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
 import './BookManager.css'
@@ -10,6 +10,8 @@ function BookManager({ onBooksProcessed, selectedSources, onSourcesChange }) {
   const [sources, setSources] = useState([])
   const [loading, setLoading] = useState(false)
   const [processing, setProcessing] = useState({})
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef(null)
 
   useEffect(() => {
     loadBooks()
@@ -18,7 +20,10 @@ function BookManager({ onBooksProcessed, selectedSources, onSourcesChange }) {
 
   const loadBooks = async () => {
     try {
-      const response = await axios.get(`${API_BASE}/books/list`)
+      const response = await axios.get(`${API_BASE}/books/list`, {
+        timeout: 30000 // 30s timeout
+      })
+      console.debug('Loaded books:', response.data)
       setBooks(response.data.books || [])
     } catch (error) {
       console.error('Error loading books:', error)
@@ -27,10 +32,38 @@ function BookManager({ onBooksProcessed, selectedSources, onSourcesChange }) {
 
   const loadSources = async () => {
     try {
-      const response = await axios.get(`${API_BASE}/books/sources/list`)
+      const response = await axios.get(`${API_BASE}/books/sources/list`, {
+        timeout: 30000
+      })
+      console.debug('Loaded sources:', response.data)
       setSources(response.data.sources || [])
     } catch (error) {
       console.error('Error loading sources:', error)
+    }
+  }
+
+  const handleFileUpload = async (event) => {
+    const file = event.target.files[0]
+    if (!file) return
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    setUploading(true)
+    try {
+      await axios.post(`${API_BASE}/books/upload`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+      await loadBooks()
+    } catch (error) {
+      console.error('Error uploading file:', error)
+      alert(`Error uploading file: ${error.response?.data?.detail || error.message}`)
+    } finally {
+      setUploading(false)
+      // Reset input
+      if (fileInputRef.current) fileInputRef.current.value = ''
     }
   }
 
@@ -130,6 +163,22 @@ function BookManager({ onBooksProcessed, selectedSources, onSourcesChange }) {
       <div className="book-manager-header">
         <h3>┌─ Books ─┐</h3>
         <div className="book-manager-actions">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileUpload}
+            style={{ display: 'none' }}
+            accept=".txt,.md,.pdf"
+          />
+          <motion.button
+            className="attach-button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            {uploading ? '...' : '+ Attach'}
+          </motion.button>
           <motion.button
             className="refresh-button"
             onClick={() => { loadBooks(); loadSources(); }}
@@ -154,7 +203,7 @@ function BookManager({ onBooksProcessed, selectedSources, onSourcesChange }) {
 
       <div className="sources-filter">
         <h4>┌─ Filter ─┐</h4>
-        <motion.div 
+        <motion.div
           className="source-checkboxes"
           variants={containerVariants}
           initial="initial"
@@ -170,7 +219,7 @@ function BookManager({ onBooksProcessed, selectedSources, onSourcesChange }) {
           </motion.label>
           <AnimatePresence>
             {sources.map(source => (
-              <motion.label 
+              <motion.label
                 key={source.source}
                 variants={itemVariants}
                 initial="initial"
@@ -191,29 +240,28 @@ function BookManager({ onBooksProcessed, selectedSources, onSourcesChange }) {
 
       <div className="books-list">
         {books.length === 0 ? (
-          <motion.div 
+          <motion.div
             className="empty-state"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
           >
             <p>No books found</p>
-            <p className="hint">Add files to reference_texts/</p>
+            <p className="hint">Attach files to get started</p>
           </motion.div>
         ) : (
           <motion.div
-            variants={containerVariants}
-            initial="initial"
-            animate="animate"
+            className="books-list-container"
           >
             {books.map(book => {
               const isProcessed = isSourceProcessed(book.name)
               const stats = getSourceStats(book.name)
-              
+
               return (
-                <motion.div 
-                  key={book.filename} 
+                <motion.div
+                  key={book.filename}
                   className="book-item"
-                  variants={itemVariants}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
                   whileHover={{ x: 4 }}
                 >
                   <div className="book-info">

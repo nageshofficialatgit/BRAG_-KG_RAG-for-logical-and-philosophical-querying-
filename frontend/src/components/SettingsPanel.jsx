@@ -18,6 +18,7 @@ function SettingsPanel({ settings, onSettingsChange, onClose }) {
   const fetchProviders = async () => {
     try {
       const response = await axios.get(`${API_BASE}/rag/providers`)
+      console.debug('Fetched providers:', response.data)
       setProviders(response.data.providers)
     } catch (error) {
       console.error('Error fetching providers:', error)
@@ -129,6 +130,7 @@ function SettingsPanel({ settings, onSettingsChange, onClose }) {
                   }
                 }}
               >
+                <option value="">Select Provider</option>
                 {providers.map(provider => (
                   <option key={provider.name} value={provider.name}>
                     {provider.name} {provider.name === 'ollama' && !ollamaAvailable && '(Not Available)'}
@@ -152,6 +154,7 @@ function SettingsPanel({ settings, onSettingsChange, onClose }) {
                 value={localSettings.model || selectedProvider?.default || ''}
                 onChange={(e) => handleChange('model', e.target.value)}
               >
+                <option value="">Select Model</option>
                 {selectedProvider?.models?.map(model => (
                   <option key={model} value={model}>
                     {model} {model === selectedProvider?.default && '(Default)'}

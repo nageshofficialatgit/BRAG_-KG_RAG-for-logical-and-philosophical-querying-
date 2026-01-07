@@ -30,7 +30,7 @@ class AddBookRequest(BaseModel):
     content: str
 
 @router.get("/list")
-async def list_books(ref_service: ReferenceService = Depends(get_reference_service)):
+def list_books(ref_service: ReferenceService = Depends(get_reference_service)):
     """Get list of all books in the reference folder"""
     try:
         books = ref_service.get_all_books()
@@ -39,7 +39,7 @@ async def list_books(ref_service: ReferenceService = Depends(get_reference_servi
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{filename}")
-async def get_book(
+def get_book(
     filename: str,
     ref_service: ReferenceService = Depends(get_reference_service)
 ):
@@ -53,7 +53,7 @@ async def get_book(
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/add")
-async def add_book(
+def add_book(
     request: AddBookRequest,
     ref_service: ReferenceService = Depends(get_reference_service)
 ):
@@ -67,13 +67,13 @@ async def add_book(
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/upload")
-async def upload_book(
+def upload_book(
     file: UploadFile = File(...),
     ref_service: ReferenceService = Depends(get_reference_service)
 ):
     """Upload a book file"""
     try:
-        content = await file.read()
+        content = file.file.read()
         
         # Decode text files
         if file.filename.endswith(('.txt', '.md')):
@@ -106,7 +106,7 @@ async def upload_book(
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.delete("/{filename}")
-async def delete_book(
+def delete_book(
     filename: str,
     ref_service: ReferenceService = Depends(get_reference_service)
 ):
@@ -120,7 +120,7 @@ async def delete_book(
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/process")
-async def process_book(
+def process_book(
     request: ProcessBookRequest,
     ref_service: ReferenceService = Depends(get_reference_service),
     kg_service: KnowledgeGraphService = Depends(get_kg_service)
@@ -150,7 +150,7 @@ async def process_book(
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/process-multiple")
-async def process_multiple_books(
+def process_multiple_books(
     request: ProcessMultipleBooksRequest,
     ref_service: ReferenceService = Depends(get_reference_service),
     kg_service: KnowledgeGraphService = Depends(get_kg_service)
@@ -185,7 +185,7 @@ async def process_multiple_books(
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/sources/list")
-async def list_sources(kg_service: KnowledgeGraphService = Depends(get_kg_service)):
+def list_sources(kg_service: KnowledgeGraphService = Depends(get_kg_service)):
     """Get list of all sources (books) in the knowledge graph"""
     try:
         sources = kg_service.get_sources()

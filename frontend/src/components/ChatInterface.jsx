@@ -7,13 +7,48 @@ import './ChatInterface.css'
 
 const API_BASE = '/api'
 
-function ChatInterface({ onGraphUpdate, settings, selectedSources = [] }) {
+function ChatInterface({ onGraphUpdate, settings, selectedSources = [], onBookAdded }) {
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [referenceText, setReferenceText] = useState('')
   const [showReferenceInput, setShowReferenceInput] = useState(false)
+
+  // Archive state: { msgIdx: number | null, filename: string }
+  const [archiveState, setArchiveState] = useState({ msgIdx: null, filename: '' })
+
   const messagesEndRef = useRef(null)
+
+  const handleArchive = async (content, filename) => {
+    if (!filename.trim()) return
+
+    // Ensure extension
+    let finalName = filename.trim()
+    if (!finalName.endsWith('.txt') && !finalName.endsWith('.md')) {
+      finalName += '.md'
+    }
+
+    try {
+      const response = await axios.post(`${API_BASE}/books/add`, {
+        filename: finalName,
+        content: content
+      })
+
+      if (response.data.success) {
+        if (onBookAdded) onBookAdded()
+        setArchiveState({ msgIdx: null, filename: '' })
+        setMessages(prev => [...prev, {
+          type: 'system',
+          content: `Successfully archived as "${finalName}"`
+        }])
+      } else {
+        alert('Failed to archive: ' + response.data.error)
+      }
+    } catch (error) {
+      console.error('Archive error:', error)
+      alert('Error archiving: ' + (error.response?.data?.detail || error.message))
+    }
+  }
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -83,7 +118,7 @@ function ChatInterface({ onGraphUpdate, settings, selectedSources = [] }) {
         model: settings.model,
         include_web: settings.includeWeb,
         include_images: settings.includeImages,
-        sources: selectedSources.length > 0 ? selectedSources : null
+        sources: selectedSources
       })
 
       const data = response.data
@@ -140,7 +175,7 @@ function ChatInterface({ onGraphUpdate, settings, selectedSources = [] }) {
 
       <AnimatePresence>
         {showReferenceInput && (
-          <motion.div 
+          <motion.div
             className="reference-input-panel"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
@@ -170,7 +205,7 @@ function ChatInterface({ onGraphUpdate, settings, selectedSources = [] }) {
       <div className="messages-container">
         <AnimatePresence mode="popLayout">
           {messages.length === 0 && !loading && (
-            <motion.div 
+            <motion.div
               className="welcome-message"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -179,7 +214,7 @@ function ChatInterface({ onGraphUpdate, settings, selectedSources = [] }) {
             >
               <h3>Welcome to Knowledge Graph RAG</h3>
               <div className="welcome-ascii">
-{`╔═══════════════════════════════════════╗
+                {`╔═══════════════════════════════════════╗
 ║   Start by adding reference text     ║
 ║   or ask a question about your      ║
 ║   knowledge domain!                 ║
@@ -187,10 +222,10 @@ function ChatInterface({ onGraphUpdate, settings, selectedSources = [] }) {
               </div>
             </motion.div>
           )}
-          
+
           {messages.map((msg, idx) => (
-            <motion.div 
-              key={idx} 
+            <motion.div
+              key={idx}
               className={`message ${msg.type}`}
               variants={messageVariants}
               initial="initial"
@@ -205,25 +240,25 @@ function ChatInterface({ onGraphUpdate, settings, selectedSources = [] }) {
                   {msg.type === 'system' && '◊'}
                   {msg.type === 'error' && '✕'}
                 </span>
-                
+
                 <div className="message-text">
                   <div className={`message-body ${msg.type === 'assistant' ? 'markdown-content' : ''}`}>
                     {msg.type === 'assistant' ? (
                       <ReactMarkdown
                         remarkPlugins={[remarkGfm]}
                         components={{
-                          h1: ({node, ...props}) => <h1 className="md-h1" {...props} />,
-                          h2: ({node, ...props}) => <h2 className="md-h2" {...props} />,
-                          h3: ({node, ...props}) => <h3 className="md-h3" {...props} />,
-                          h4: ({node, ...props}) => <h4 className="md-h4" {...props} />,
-                          p: ({node, ...props}) => <p className="md-p" {...props} />,
-                          ul: ({node, ...props}) => <ul className="md-ul" {...props} />,
-                          ol: ({node, ...props}) => <ol className="md-ol" {...props} />,
-                          li: ({node, ...props}) => <li className="md-li" {...props} />,
-                          blockquote: ({node, ...props}) => <blockquote className="md-blockquote" {...props} />,
-                          strong: ({node, ...props}) => <strong className="md-strong" {...props} />,
-                          em: ({node, ...props}) => <em className="md-em" {...props} />,
-                          code: ({node, inline, ...props}) => 
+                          h1: ({ node, ...props }) => <h1 className="md-h1" {...props} />,
+                          h2: ({ node, ...props }) => <h2 className="md-h2" {...props} />,
+                          h3: ({ node, ...props }) => <h3 className="md-h3" {...props} />,
+                          h4: ({ node, ...props }) => <h4 className="md-h4" {...props} />,
+                          p: ({ node, ...props }) => <p className="md-p" {...props} />,
+                          ul: ({ node, ...props }) => <ul className="md-ul" {...props} />,
+                          ol: ({ node, ...props }) => <ol className="md-ol" {...props} />,
+                          li: ({ node, ...props }) => <li className="md-li" {...props} />,
+                          blockquote: ({ node, ...props }) => <blockquote className="md-blockquote" {...props} />,
+                          strong: ({ node, ...props }) => <strong className="md-strong" {...props} />,
+                          em: ({ node, ...props }) => <em className="md-em" {...props} />,
+                          code: ({ node, inline, ...props }) =>
                             inline ? <code className="md-code-inline" {...props} /> : <code className="md-code-block" {...props} />,
                         }}
                       >
@@ -233,9 +268,55 @@ function ChatInterface({ onGraphUpdate, settings, selectedSources = [] }) {
                       msg.content
                     )}
                   </div>
-                  
+
+                  {/* Archive Button for Assistant Messages */}
+                  {msg.type === 'assistant' && (
+                    <div className="message-actions">
+                      {archiveState.msgIdx === idx ? (
+                        <div className="archive-input-container">
+                          <input
+                            type="text"
+                            className="archive-filename-input"
+                            value={archiveState.filename}
+                            onChange={(e) => setArchiveState(prev => ({ ...prev, filename: e.target.value }))}
+                            placeholder="filename.md"
+                            autoFocus
+                          />
+                          <button
+                            className="archive-confirm-btn"
+                            onClick={() => handleArchive(msg.content, archiveState.filename)}
+                            title="Save"
+                          >
+                            ✓
+                          </button>
+                          <button
+                            className="archive-cancel-btn"
+                            onClick={() => setArchiveState({ msgIdx: null, filename: '' })}
+                            title="Cancel"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          className="archive-button"
+                          onClick={() => {
+                            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
+                            setArchiveState({
+                              msgIdx: idx,
+                              filename: `chat_response_${timestamp}.md`
+                            })
+                          }}
+                          title="Archive to Knowledge Base"
+                        >
+                          [ Archive ]
+                        </button>
+                      )}
+                    </div>
+                  )}
+
                   {msg.sources && Object.keys(msg.sources).length > 0 && (
-                    <motion.div 
+                    <motion.div
                       className="message-sources"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
@@ -258,7 +339,7 @@ function ChatInterface({ onGraphUpdate, settings, selectedSources = [] }) {
                   )}
 
                   {msg.images && msg.images.length > 0 && (
-                    <motion.div 
+                    <motion.div
                       className="message-images"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
@@ -281,9 +362,9 @@ function ChatInterface({ onGraphUpdate, settings, selectedSources = [] }) {
               </div>
             </motion.div>
           ))}
-          
+
           {loading && (
-            <motion.div 
+            <motion.div
               className="message assistant"
               variants={messageVariants}
               initial="initial"
@@ -301,7 +382,7 @@ function ChatInterface({ onGraphUpdate, settings, selectedSources = [] }) {
             </motion.div>
           )}
         </AnimatePresence>
-        
+
         <div ref={messagesEndRef} />
       </div>
 

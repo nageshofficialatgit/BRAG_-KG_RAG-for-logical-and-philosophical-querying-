@@ -22,6 +22,7 @@
     transform: translateY(-10px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -268,4 +269,29 @@
     border-right: none;
     border-bottom: 1px solid var(--color-border);
   }
+}
+
+/* Visual Status Indicators */
+.book-item.processed {
+  border-left: 3px solid var(--color-success);
+}
+
+.book-item.unprocessed {
+  border-left: 3px solid var(--color-text-tertiary);
+}
+
+.status-dot {
+  font-size: 0.8rem;
+  margin-right: 0.5rem;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.status-green {
+  color: var(--color-success);
+  text-shadow: 0 0 5px rgba(22, 163, 74, 0.4);
+}
+
+.status-grey {
+  color: var(--color-text-tertiary);
 }

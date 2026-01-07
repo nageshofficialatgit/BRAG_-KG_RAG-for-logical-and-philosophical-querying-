@@ -21,6 +21,7 @@
     transform: translateY(-10px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -135,6 +136,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -168,6 +170,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -491,10 +494,14 @@
 }
 
 @keyframes bounce {
-  0%, 80%, 100% {
+
+  0%,
+  80%,
+  100% {
     transform: scale(0);
     opacity: 0.5;
   }
+
   40% {
     transform: scale(1);
     opacity: 1;
@@ -595,13 +602,84 @@
   .message {
     max-width: 100%;
   }
-  
+
   .message-image {
     width: 100px;
     height: 100px;
   }
-  
+
   .input-container {
     gap: 0.5rem;
   }
+}
+
+/* Archive Feature Styling */
+.message-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+.archive-button {
+  background: none;
+  border: none;
+  color: var(--color-text-tertiary);
+  font-family: 'Courier New', monospace;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  opacity: 0.7;
+}
+
+.archive-button:hover {
+  opacity: 1;
+  color: var(--color-accent);
+  background: rgba(37, 99, 235, 0.05);
+}
+
+.archive-input-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--color-bg-primary);
+  padding: 0.25rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  animation: fadeIn 0.2s ease-out;
+}
+
+.archive-filename-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  width: 200px;
+  padding: 0.25rem;
+}
+
+.archive-filename-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.archive-confirm-btn,
+.archive-confirm-btn:hover {
+  color: var(--color-success);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.archive-cancel-btn,
+.archive-cancel-btn:hover {
+  color: var(--color-error);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
 }

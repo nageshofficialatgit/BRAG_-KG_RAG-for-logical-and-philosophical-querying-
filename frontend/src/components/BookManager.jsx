@@ -5,7 +5,7 @@ import './BookManager.css'
 
 const API_BASE = '/api'
 
-function BookManager({ onBooksProcessed, selectedSources, onSourcesChange }) {
+function BookManager({ onBooksProcessed, selectedSources, onSourcesChange, refreshTrigger }) {
   const [books, setBooks] = useState([])
   const [sources, setSources] = useState([])
   const [loading, setLoading] = useState(false)
@@ -16,7 +16,7 @@ function BookManager({ onBooksProcessed, selectedSources, onSourcesChange }) {
   useEffect(() => {
     loadBooks()
     loadSources()
-  }, [])
+  }, [refreshTrigger])
 
   const loadBooks = async () => {
     try {
@@ -136,15 +136,38 @@ function BookManager({ onBooksProcessed, selectedSources, onSourcesChange }) {
   }
 
   const toggleSourceSelection = (sourceName) => {
-    if (!selectedSources) {
-      onSourcesChange([sourceName])
+    console.debug('Toggling source:', sourceName, 'Current selection:', selectedSources)
+
+    // Case 1: Currently "All Selected" (null)
+    // We want to unselect this specific item, so we select everything ELSE.
+    if (selectedSources === null) {
+      if (!sources || sources.length === 0) {
+        console.warn('Cannot toggle source: Source list is empty')
+        return
+      }
+
+      const allOtherSources = sources
+        .filter(s => s.source !== sourceName)
+        .map(s => s.source)
+
+      console.debug('Transitioning from All to Subset:', allOtherSources)
+      onSourcesChange(allOtherSources)
       return
     }
 
+    // Case 2: Currently a Subset
     if (selectedSources.includes(sourceName)) {
-      onSourcesChange(selectedSources.filter(s => s !== sourceName))
+      // Removing item
+      const newSelection = selectedSources.filter(s => s !== sourceName)
+      console.debug('Removing source. New selection:', newSelection)
+      onSourcesChange(newSelection)
     } else {
-      onSourcesChange([...selectedSources, sourceName])
+      // Adding item
+      const newSelection = [...selectedSources, sourceName]
+      console.debug('Adding source. New selection:', newSelection)
+      // Note: We deliberately do NOT revert to 'null' (All) here even if valid.
+      // This keeps the behavior deterministic (All = user explicitly clicked All).
+      onSourcesChange(newSelection)
     }
   }
 
@@ -212,29 +235,17 @@ function BookManager({ onBooksProcessed, selectedSources, onSourcesChange }) {
           <motion.label variants={itemVariants}>
             <input
               type="checkbox"
-              checked={!selectedSources || selectedSources.length === 0}
-              onChange={() => onSourcesChange([])}
+              // Checked if state is null (explicit All) OR if manual selection covers all sources
+              checked={selectedSources === null || (sources.length > 0 && selectedSources.length === sources.length)}
+              // Clicking always toggles to explicit All (null) or None ([])
+              onChange={() => {
+                const isAll = selectedSources === null || (sources.length > 0 && selectedSources.length === sources.length)
+                onSourcesChange(isAll ? [] : null)
+              }}
             />
             All Sources
           </motion.label>
-          <AnimatePresence>
-            {sources.map(source => (
-              <motion.label
-                key={source.source}
-                variants={itemVariants}
-                initial="initial"
-                animate="animate"
-                exit={{ opacity: 0, x: -10 }}
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedSources?.includes(source.source) || false}
-                  onChange={() => toggleSourceSelection(source.source)}
-                />
-                {source.source} ({source.nodes})
-              </motion.label>
-            ))}
-          </AnimatePresence>
+          {/* Individual sources list removed - moved to book cards */}
         </motion.div>
       </div>
 
@@ -259,13 +270,18 @@ function BookManager({ onBooksProcessed, selectedSources, onSourcesChange }) {
               return (
                 <motion.div
                   key={book.filename}
-                  className="book-item"
+                  className={`book-item ${isProcessed ? 'processed' : 'unprocessed'}`}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   whileHover={{ x: 4 }}
                 >
                   <div className="book-info">
-                    <div className="book-name">▪ {book.name}</div>
+                    <div className="book-name">
+                      <span className={`status-dot ${isProcessed ? 'status-green' : 'status-grey'}`}>
+                        {isProcessed ? '●' : '○'}
+                      </span>
+                      ▪ {book.name}
+                    </div>
                     <div className="book-meta">
                       {book.size_mb} MB • {book.extension.toUpperCase()}
                       {isProcessed && stats && (
@@ -274,6 +290,19 @@ function BookManager({ onBooksProcessed, selectedSources, onSourcesChange }) {
                         </span>
                       )}
                     </div>
+                  </div>
+                  <div className="book-select">
+                    <label title={isProcessed ? "Use this source for answers" : "Source not processed yet (will return no results)"}>
+                      <input
+                        type="checkbox"
+                        checked={selectedSources === null || (sources.length > 0 && selectedSources.length === sources.length) ? true : selectedSources.includes(book.name)}
+                        onChange={(e) => {
+                          e.stopPropagation()
+                          toggleSourceSelection(book.name)
+                        }}
+                      />
+                      <span>Use</span>
+                    </label>
                   </div>
                   <div className="book-actions">
                     <motion.button
@@ -300,7 +329,7 @@ function BookManager({ onBooksProcessed, selectedSources, onSourcesChange }) {
           </motion.div>
         )}
       </div>
-    </div>
+    </div >
   )
 }
 

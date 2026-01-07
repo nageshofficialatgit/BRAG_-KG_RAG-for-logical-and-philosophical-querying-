@@ -197,7 +197,7 @@ Be comprehensive but accurate. Only extract relationships that are explicitly st
         documents: List[Document]
     ) -> List[Any]:
         """Convert documents to LangChain GraphDocument format"""
-        from langchain_core.graph_document import GraphDocument, Node, Relationship
+        from langchain_community.graphs.graph_document import GraphDocument, Node, Relationship
         
         import asyncio
         try:

@@ -244,8 +244,8 @@ class RAGService:
                         k=settings.TOP_K_RESULTS
                     )
                     for doc in vector_results:
-                        # Filter by sources if specified
-                        if not sources or doc.metadata.get('source') in sources:
+                        # Filter by sources if specified (if sources is None, include all)
+                        if sources is None or doc.metadata.get('source') in sources:
                             context_parts.append(doc.page_content[:200])
                 except Exception as e:
                     logger.warning(f"Vector search error: {str(e)}")
@@ -253,7 +253,7 @@ class RAGService:
             return {
                 "text": "\n".join(context_parts),
                 "entities": list(set(all_entities)),
-                "sources_used": sources or []
+                "sources_used": sources if sources is not None else []
             }
         except Exception as e:
             logger.error(f"Error getting KG context: {str(e)}")

@@ -279,7 +279,7 @@ class KnowledgeGraphService:
     ) -> List[Dict[str, Any]]:
         """Get entities related to a given entity, optionally filtered by sources and relationship types"""
         source_filter = ""
-        if sources:
+        if sources is not None:
             source_list = "', '".join(sources)
             source_filter = f"""
             AND EXISTS {{

@@ -1,0 +1,32 @@
+/* Add these styles to the end of BookManager.css */
+
+.book-select {
+  display: flex;
+  align-items: center;
+  margin-right: 0.75rem;
+  padding-right: 0.75rem;
+  border-right: 1px solid var(--color-border);
+}
+
+.book-select label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  font-family: 'Courier New', monospace;
+  font-weight: 500;
+  user-select: none;
+}
+
+.book-select label:hover {
+  color: var(--color-accent);
+}
+
+.book-select input[type="checkbox"] {
+  cursor: pointer;
+  width: 14px;
+  height: 14px;
+  accent-color: var(--color-accent);
+}

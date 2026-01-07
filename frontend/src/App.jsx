@@ -10,7 +10,7 @@ function App() {
   const [graphData, setGraphData] = useState({ nodes: [], edges: [] })
   const [showSettings, setShowSettings] = useState(false)
   const [showBooks, setShowBooks] = useState(true)
-  const [selectedSources, setSelectedSources] = useState([])
+  const [selectedSources, setSelectedSources] = useState(null)
   const [settings, setSettings] = useState({
     llmProvider: 'ollama',
     model: 'gemma3:4b',
@@ -32,32 +32,7 @@ function App() {
   const [chatWidth, setChatWidth] = useState(600)
   const draggingRef = useRef(null)
 
-  useEffect(() => {
-    const onMouseMove = (e) => {
-      if (!draggingRef.current) return
-      const { type, startX, startLeftWidth, startChatWidth } = draggingRef.current
-      const dx = e.clientX - startX
-      if (type === 'left') {
-        const newLeft = Math.max(180, Math.min(600, startLeftWidth + dx))
-        setLeftWidth(newLeft)
-      } else if (type === 'right') {
-        const newChat = Math.max(300, Math.min((containerRef.current?.offsetWidth || 1200) - 200, startChatWidth + dx))
-        setChatWidth(newChat)
-      }
-    }
 
-    const onMouseUp = () => {
-      draggingRef.current = null
-      document.body.style.cursor = ''
-    }
-
-    window.addEventListener('mousemove', onMouseMove)
-    window.addEventListener('mouseup', onMouseUp)
-    return () => {
-      window.removeEventListener('mousemove', onMouseMove)
-      window.removeEventListener('mouseup', onMouseUp)
-    }
-  }, [])
 
   const startDrag = (type, e) => {
     draggingRef.current = {
@@ -70,12 +45,19 @@ function App() {
     e.preventDefault()
   }
 
+  // Refresh coordination
+  const [refreshBooksTrigger, setRefreshBooksTrigger] = useState(0)
+
+  const handleBookAdded = () => {
+    setRefreshBooksTrigger(prev => prev + 1)
+  }
+
   return (
     <div className="app">
       <header className="app-header">
         <h1 className="ascii-header">╔════════════════════════════════════════╗
-║   Knowledge Graph RAG System           ║
-╚════════════════════════════════════════╝</h1>
+          ║   Knowledge Graph RAG System           ║
+          ╚════════════════════════════════════════╝</h1>
         <div className="header-actions">
           <motion.button
             className={`toggle-button ${showBooks ? 'active' : ''}`}
@@ -96,7 +78,7 @@ function App() {
           </motion.button>
         </div>
       </header>
-      
+
       {showSettings && (
         <SettingsPanel
           settings={settings}
@@ -107,7 +89,7 @@ function App() {
 
       <div className="app-content" ref={containerRef}>
         {showBooks && (
-          <motion.div 
+          <motion.div
             className="books-panel"
             style={{ width: leftWidth }}
             initial={{ x: -20, opacity: 0 }}
@@ -119,6 +101,7 @@ function App() {
               onBooksProcessed={handleBooksProcessed}
               selectedSources={selectedSources}
               onSourcesChange={setSelectedSources}
+              refreshTrigger={refreshBooksTrigger}
             />
           </motion.div>
         )}
@@ -131,6 +114,7 @@ function App() {
             onGraphUpdate={handleGraphUpdate}
             settings={settings}
             selectedSources={selectedSources}
+            onBookAdded={handleBookAdded}
           />
         </div>
 

@@ -78,7 +78,11 @@ BRAG/
 │       ├── prompt_loader.py   # 🆕 Dynamic prompt loading
 │       ├── output_processor.py    # 🆕 Output quality processing
 │       ├── confidence_scorer.py   # 🆕 Confidence scoring
-│       └── conversation_memory_service.py  # 🆕 Persistent memory
+│       ├── conversation_memory_service.py  # 🆕 Persistent memory
+│       ├── philosophy_kg_transformer.py # 🆕 Custom philosophy extraction
+│       ├── philosophy_search_enhancer.py # 🆕 Search enhancement
+│       ├── reference_service.py   # 🆕 Reference text management
+│       └── robots_parser.py       # 🆕 Robots.txt compliance
 ├── frontend/                   # React frontend
 │   ├── src/
 │   │   ├── App.jsx            # Main app component (white theme, animations)

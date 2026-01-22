@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
-from backend.services.web_crawler_service import WebCrawlerService
-from backend.services.llm_service import LLMService
+from backend.services.tools.web_crawler_service import WebCrawlerService
+from backend.services.core.llm_service import LLMService
 
 router = APIRouter()
 

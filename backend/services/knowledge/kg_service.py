@@ -5,8 +5,8 @@ from langchain_experimental.graph_transformers import LLMGraphTransformer
 from langchain.text_splitter import TokenTextSplitter
 from langchain_core.documents import Document
 from backend.config import settings
-from backend.services.llm_service import LLMService
-from backend.services.philosophy_kg_transformer import PhilosophyKGTransformer
+from backend.services.core.llm_service import LLMService
+from backend.services.knowledge.philosophy_kg_transformer import PhilosophyKGTransformer
 from backend.constants import COMMON_PHILOSOPHERS, PHILOSOPHY_ENTITY_TYPES, PHILOSOPHY_RELATIONSHIP_TYPES
 import logging
 import asyncio
@@ -621,3 +621,23 @@ Return only the names, one per line, no explanations."""
         """Close database connections"""
         if hasattr(self, 'driver'):
             self.driver.close()
+
+    async def search_entities(self, query: str, limit: int = 5) -> List[Dict[str, Any]]:
+        """Search for entities in the graph based on a natural language query"""
+        # Extract potential entities from query
+        # Note: _extract_entities_from_query_enhanced is sync, so we call it directly
+        entities = self._extract_entities_from_query_enhanced(query)
+        
+        results = []
+        for entity in entities:
+             # Search for this entity
+             details = self.get_entity_details(entity)
+             if details.get("found"):
+                 results.append({
+                     "id": details.get("entity"),
+                     "name": details.get("entity"),
+                     "description": f"Type: {details.get('type')}. Relationships: {len(details.get('relationships', []))}",
+                     "type": details.get("type")
+                 })
+                 
+        return results[:limit]

@@ -1,9 +1,9 @@
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
-from backend.services.reference_service import ReferenceService
-from backend.services.kg_service import KnowledgeGraphService
-from backend.services.llm_service import LLMService
+from backend.services.knowledge.reference_service import ReferenceService
+from backend.services.knowledge.kg_service import KnowledgeGraphService
+from backend.services.core.llm_service import LLMService
 
 router = APIRouter()
 

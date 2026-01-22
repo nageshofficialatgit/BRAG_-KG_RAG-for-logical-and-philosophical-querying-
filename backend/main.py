@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 import os
 from dotenv import load_dotenv
 
-from backend.routers import kg, rag, web_crawler, images, books
+from backend.routers import kg, rag, web_crawler, images, books, orchestration
 
 load_dotenv()
 
@@ -34,6 +34,7 @@ app.include_router(rag.router, prefix="/api/rag", tags=["rag"])
 app.include_router(web_crawler.router, prefix="/api/crawler", tags=["web-crawler"])
 app.include_router(images.router, prefix="/api/images", tags=["images"])
 app.include_router(books.router, prefix="/api/books", tags=["books"])
+app.include_router(orchestration.router, prefix="/api/orchestrate", tags=["orchestration"])
 
 @app.get("/")
 async def root():

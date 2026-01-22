@@ -67,3 +67,51 @@ class LLMService:
     
     def get_chat_model(self) -> BaseChatModel:
         return self.llm
+
+
+class OllamaLLMService:
+    """
+    Local Ollama inference (no API costs, full privacy)
+    """
+    
+    def __init__(self):
+        self.base_url = settings.OLLAMA_BASE_URL
+        
+    async def generate(
+        self,
+        prompt: str,
+        model: str = None,
+        temperature: float = 0.5,
+        top_p: float = 0.95,
+        max_tokens: int = 2000
+    ) -> str:
+        """
+        Call local Ollama model
+        """
+        model = model or settings.DEFAULT_OLLAMA_MODEL
+        
+        async with httpx.AsyncClient() as client:
+            payload = {
+                "model": model,
+                "prompt": prompt,
+                "temperature": temperature,
+                "top_p": top_p,
+                "num_predict": max_tokens,
+                "stream": False
+            }
+            
+            try:
+                response = await client.post(
+                    f"{self.base_url}/api/generate",
+                    json=payload,
+                    timeout=60.0 # generous timeout for reasoning
+                )
+                
+                if response.status_code != 200:
+                    raise Exception(f"Ollama error: {response.text}")
+                
+                data = response.json()
+                return data.get("response", "")
+            except Exception as e:
+                print(f"Ollama generation error: {str(e)}")
+                raise e

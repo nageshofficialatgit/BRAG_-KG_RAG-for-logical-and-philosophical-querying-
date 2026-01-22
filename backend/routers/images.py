@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from typing import List, Dict, Any
-from backend.services.image_service import ImageService
+from backend.services.tools.image_service import ImageService
 from typing import Optional, List
 router = APIRouter()
 

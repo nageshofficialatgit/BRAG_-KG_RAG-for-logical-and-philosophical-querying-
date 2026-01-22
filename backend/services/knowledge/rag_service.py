@@ -4,14 +4,14 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnableParallel, RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
-from backend.services.kg_service import KnowledgeGraphService
-from backend.services.web_crawler_service import WebCrawlerService
-from backend.services.image_service import ImageService
-from backend.services.llm_service import LLMService
-from backend.services.output_processor import OutputProcessor
-from backend.services.confidence_scorer import ConfidenceScorer
-from backend.services.prompt_loader import PromptLoader
-from backend.services.conversation_memory_service import ConversationMemoryService
+from backend.services.knowledge.kg_service import KnowledgeGraphService
+from backend.services.tools.web_crawler_service import WebCrawlerService
+from backend.services.tools.image_service import ImageService
+from backend.services.core.llm_service import LLMService
+from backend.services.core.output_processor import OutputProcessor
+from backend.services.orchestrator.confidence_scorer import ConfidenceScorer
+from backend.services.core.prompt_loader import PromptLoader
+from backend.services.core.conversation_memory_service import ConversationMemoryService
 from backend.config import settings
 import logging
 
